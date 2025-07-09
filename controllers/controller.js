@@ -3,14 +3,23 @@ import Results from "../models/resultSchema.js";
 import questions, { answers } from '../database/data.js'
 
 /** get all questions */
-export async function getQuestions(req, res){
-    try {
-        const q = await Questions.find();
-        res.json(q)
-    } catch (error) {
-        res.json({ error })
+export async function getQuestions(req, res) {
+  try {
+    const questionsData = await Questions.find();
+
+    if (!questionsData || questionsData.length === 0) {
+      return res.status(404).json({ error: "No questions found" });
     }
+
+    const { questions = [], answers = [] } = questionsData[0];
+
+    return res.status(200).json({ questions, answers });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
+
 
 /** insert all questinos */
 export async function insertQuestions(req, res){
