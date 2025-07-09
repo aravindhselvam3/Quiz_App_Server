@@ -1,50 +1,36 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 import router from './router/route.js';
-
-
-/** import connection file */
 import connect from './database/conn.js';
 
-const app = express()
+// Load environment variables
+dotenv.config();
 
+// App initialization
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-/** app middlewares */
+// Middlewares
 app.use(morgan('tiny'));
 app.use(cors());
 app.use(express.json());
-config();
 
-
-/** appliation port */
-const port = process.env.PORT||8080;
-
-
-/** routes */
-app.use('/api', router) /** apis */
-
+// Routes
+app.use('/api', router);
 
 app.get('/', (req, res) => {
-    try {
-        res.json("Get Request")
-    } catch (error) {
-        res.json(error)
-    }
-})
+  return res.status(200).json({ message: 'Server is up and running!' });
+});
 
-
-/** start server only when we have valid connection */
-connect().then(() => {
-    try {
-        app.listen(port, () => {
-            console.log(`Server connected to http://localhost:${port}`)
-        })
-    } catch (error) {
-        console.log("Cannot connect to the server");
-    }
-}).catch(error => {
-    console.log("Invalid Database Connection");
-})
-
+// Start server only if DB connects
+connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server is running at: http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ Failed to connect to MongoDB:', error.message);
+  });
